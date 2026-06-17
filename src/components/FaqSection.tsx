@@ -60,7 +60,7 @@ export default function FaqSection() {
               </p>
               <div className="flex items-center gap-4 pt-1">
                 <a
-                  href="https://github.com/Rpann"
+                  href="https://github.com/Rpann/Clearcut"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-md font-sans font-medium text-sm transition-colors duration-200"
