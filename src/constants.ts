@@ -2,25 +2,25 @@ export const SAMPLES = [
   {
     id: "portrait",
     name: "Portrait",
-    url: "/Sample Image 1.jpg",
+    url: "/sample-image-1.jpg",
     desc: "Finely-detailed hair edges",
   },
   {
     id: "dog",
     name: "Cute Pet",
-    url: "/Sample Image 2.jpg",
+    url: "/sample-image-2.jpg",
     desc: "Soft fur and whiskers",
   },
   {
     id: "food",
     name: "Food",
-    url: "/Sample Image 3.jpg",
+    url: "/sample-image-3.jpg",
     desc: "Clean product shot",
   },
   {
     id: "man",
     name: "Man",
-    url: "/Sample Image 4.jpg",
+    url: "/sample-image-4.jpg",
     desc: "Sharp portrait edges",
   },
 ];

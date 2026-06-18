@@ -1,8 +1,8 @@
 import React, { useState, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 
-const ORIGINAL_IMG = "/Sample Image 1.jpg";
-const REMOVED_IMG = "/Sample Image 1 tarnsparent.png";
+const ORIGINAL_IMG = "/sample-image-1.jpg";
+const REMOVED_IMG = "/sample-image-1-transparent.png";
 
 export default function ShowcaseSection() {
   const [sliderPos, setSliderPos] = useState(50);
