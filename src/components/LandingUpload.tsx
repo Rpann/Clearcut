@@ -6,6 +6,7 @@ import { SAMPLES } from "../constants";
 interface LandingUploadProps {
   isDragOver: boolean;
   error: string | null;
+  isModelReady: boolean;
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: () => void;
@@ -16,6 +17,7 @@ interface LandingUploadProps {
 export default function LandingUpload({
   isDragOver,
   error,
+  isModelReady,
   onFileChange,
   onDragOver,
   onDragLeave,
@@ -128,6 +130,8 @@ export default function LandingUpload({
           <button className="bg-primary hover:bg-primary-dark text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl font-display font-bold text-sm active:scale-[0.97] transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30">
             Browse Files
           </button>
+
+
         </motion.div>
 
         {error && (

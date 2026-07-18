@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { removeBackground } from "@imgly/background-removal";
+import type { Config } from "@imgly/background-removal";
 import { AnimatePresence, motion } from "motion/react";
 
 import Header from "./components/Header";
@@ -10,8 +11,26 @@ import EditorPanel from "./components/EditorPanel";
 import FaqSection from "./components/FaqSection";
 import ShowcaseSection from "./components/ShowcaseSection";
 import ReviewPopup from "./components/ReviewPopup";
-import { downloadImage } from "./utils";
+import { downloadImage, resizeImageBlob } from "./utils";
+import { useModelPreload } from "./hooks/useModelPreload";
 import type { ViewMode, BgType } from "./constants";
+
+
+function makeConfig(
+  progressCb?: (key: string, current: number, total: number) => void
+): Partial<Config> {
+  return {
+    model: "isnet_quint8" as Config["model"],
+    device: "gpu" as Config["device"],
+    proxyToWorker: true,
+    debug: false,
+    output: {
+      format: "image/png" as const,
+      quality: 0.9,
+    },
+    ...(progressCb ? { progress: progressCb } : {}),
+  };
+}
 
 export default function App() {
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
@@ -34,19 +53,31 @@ export default function App() {
   const [showReviewPopup, setShowReviewPopup] = useState(false);
   const hasShownReview = useRef(false);
 
+
+  const preloadConfig = useMemo(() => makeConfig(), []);
+
+
+  const { isModelReady } = useModelPreload(preloadConfig);
+
+
   useEffect(() => {
     return () => {
       if (resultImageUrl) URL.revokeObjectURL(resultImageUrl);
+      if (originalImageUrl && !originalImageUrl.startsWith("https://")) {
+        URL.revokeObjectURL(originalImageUrl);
+      }
     };
-  }, [resultImageUrl]);
+  }, [resultImageUrl, originalImageUrl]);
 
   const processBlob = async (blob: Blob) => {
-    const processed = await removeBackground(blob, {
-      progress: (item, current, total) => {
-        setStage(item || "processing");
-        setProgress(Math.round((current / total) * 100));
-      },
+    const optimizedBlob = await resizeImageBlob(blob);
+
+    const config = makeConfig((item, current, total) => {
+      setStage(item || "processing");
+      setProgress(Math.round((current / total) * 100));
     });
+
+    const processed = await removeBackground(optimizedBlob, config as Config);
     setResultBlob(processed);
     setResultImageUrl(URL.createObjectURL(processed));
 
@@ -62,6 +93,7 @@ export default function App() {
     setError(null);
     setResultImageUrl(null);
     setResultBlob(null);
+
 
     if (originalImageUrl && !originalImageUrl.startsWith("https://")) {
       URL.revokeObjectURL(originalImageUrl);
@@ -131,6 +163,12 @@ export default function App() {
   };
 
   const handleReset = () => {
+
+    if (resultImageUrl) URL.revokeObjectURL(resultImageUrl);
+    if (originalImageUrl && !originalImageUrl.startsWith("https://")) {
+      URL.revokeObjectURL(originalImageUrl);
+    }
+
     setOriginalImageUrl(null);
     setOriginalBlob(null);
     setResultBlob(null);
@@ -154,6 +192,7 @@ export default function App() {
             <LandingUpload
               isDragOver={isDragOver}
               error={error}
+              isModelReady={isModelReady}
               onFileChange={handleFileChange}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}

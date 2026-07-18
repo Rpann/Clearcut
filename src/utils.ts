@@ -2,9 +2,10 @@ import { GRADIENT_STOPS } from "./constants";
 import type { BgType } from "./constants";
 
 const STAGE_LABELS: [string[], string][] = [
-  [["fetch", "download"], "Getting things ready"],
-  [["compile", "wasm"],   "Almost there"],
-  [["inference", "predict", "process", "apply", "mask", "transparency"], "Creating awesomeness"],
+  [["fetch", "download"],    "Downloading AI model"],
+  [["compile", "wasm"],      "Compiling engine"],
+  [["inference", "predict"], "Analyzing image"],
+  [["process", "apply", "mask", "transparency"], "Removing background"],
 ];
 
 export function getFriendlyStageLabel(raw: string): string {
@@ -12,6 +13,67 @@ export function getFriendlyStageLabel(raw: string): string {
   const lower = raw.toLowerCase();
   const match = STAGE_LABELS.find(([keys]) => keys.some((k) => lower.includes(k)));
   return match ? match[1] : "Creating magic";
+}
+
+
+const MAX_INFERENCE_DIMENSION = 1024;
+
+
+export async function resizeImageBlob(blob: Blob): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const { naturalWidth: w, naturalHeight: h } = img;
+      const longest = Math.max(w, h);
+
+
+      if (longest <= MAX_INFERENCE_DIMENSION) {
+        URL.revokeObjectURL(img.src);
+        resolve(blob);
+        return;
+      }
+
+      const scale = MAX_INFERENCE_DIMENSION / longest;
+      const newW = Math.round(w * scale);
+      const newH = Math.round(h * scale);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = newW;
+      canvas.height = newH;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        URL.revokeObjectURL(img.src);
+        resolve(blob); // fallback to original
+        return;
+      }
+
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(img, 0, 0, newW, newH);
+
+      URL.revokeObjectURL(img.src);
+
+      canvas.toBlob(
+        (resized) => {
+          if (resized) {
+            resolve(resized);
+          } else {
+            resolve(blob); // fallback
+          }
+        },
+        "image/png",
+        1.0
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(img.src);
+      reject(new Error("Failed to load image for resizing"));
+    };
+
+    img.src = URL.createObjectURL(blob);
+  });
 }
 
 export function downloadImage(

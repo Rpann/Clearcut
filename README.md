@@ -2,6 +2,8 @@
 
 A client-side background removal app built with React and WebAssembly. Upload an image, remove its background, and download a high-resolution transparent PNG — all inside the browser, with zero server uploads.
 
+https://github.com/user-attachments/assets/036b34ef-f29a-4071-9bb0-d70f21c4fc89
+
 ## Features
 
 - **Browser-Based Processing:** Backgrounds are removed using a WASM neural network that runs entirely on your device.
@@ -34,8 +36,6 @@ npm install
 npm run dev
 ```
 
-The app starts on **http://localhost:3000**.
-
 ## Project Structure
 
 ```
@@ -43,6 +43,7 @@ Clearcut/
 ├── public/
 ├── src/
 │   ├── components/
+│   ├── hooks/
 │   ├── App.tsx
 │   ├── constants.ts
 │   ├── utils.ts

@@ -1,5 +1,4 @@
 import React, { useRef } from "react";
-import { Info } from "lucide-react";
 import { motion } from "motion/react";
 import { PRESET_GRADIENTS } from "../constants";
 import type { ViewMode, BgType } from "../constants";
@@ -95,18 +94,63 @@ export default function ImageViewer({
 
         <div className="flex-1 min-h-[280px] sm:min-h-[350px] md:min-h-[420px] max-h-[400px] sm:max-h-[500px] flex items-center justify-center relative overflow-hidden bg-surface-50/30 dark:bg-surface-900/30">
           {isProcessing && (
-            <div className="absolute inset-0 z-20 bg-surface-900/95 flex flex-col items-center justify-center text-white p-6 text-center">
-              <div className="w-16 h-16 border-4 border-white/10 border-t-primary rounded-full animate-spin mb-6" />
-              <div className="w-full max-w-xs space-y-3">
-                <span className="text-3xl font-display font-black tracking-tight block">{progress}%</span>
-                <div className="w-64 h-1.5 bg-white/10 overflow-hidden rounded-full mx-auto">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary to-violet rounded-full transition-all duration-200"
-                    style={{ width: `${progress}%` }}
-                  />
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-white p-6 text-center">
+              {/* Blurred original image as processing backdrop */}
+              <div className="absolute inset-0 overflow-hidden">
+                <img
+                  src={originalImageUrl}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-cover scale-110"
+                  style={{ filter: "blur(30px) brightness(0.3) saturate(1.2)" }}
+                />
+                <div className="absolute inset-0 bg-surface-900/60" />
+              </div>
+
+              {/* Processing UI — remains responsive because inference runs in a Web Worker */}
+              <div className="relative z-10 flex flex-col items-center">
+                {/* Animated ring */}
+                <div className="relative w-20 h-20 mb-6">
+                  <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
+                    <circle
+                      cx="40" cy="40" r="34"
+                      fill="none"
+                      stroke="rgba(255,255,255,0.08)"
+                      strokeWidth="5"
+                    />
+                    <motion.circle
+                      cx="40" cy="40" r="34"
+                      fill="none"
+                      stroke="url(#progressGradient)"
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 34}`}
+                      strokeDashoffset={`${2 * Math.PI * 34 * (1 - progress / 100)}`}
+                      style={{ transition: "stroke-dashoffset 0.3s ease-out" }}
+                    />
+                    <defs>
+                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#818CF8" />
+                        <stop offset="100%" stopColor="#C084FC" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-xl font-display font-black tracking-tight">
+                    {progress}%
+                  </span>
                 </div>
-                <p className="text-xs text-white/50 mt-4 leading-relaxed">
+
+                {/* Stage label */}
+                <motion.p
+                  key={stage}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-sm font-semibold text-white/90 mb-1"
+                >
                   {getFriendlyStageLabel(stage)}
+                </motion.p>
+
+                <p className="text-[11px] text-white/40 max-w-[220px] leading-relaxed">
+                  AI is working its magic on your image
                 </p>
               </div>
             </div>
