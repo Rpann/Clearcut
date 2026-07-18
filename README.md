@@ -50,5 +50,6 @@ Clearcut/
 │   └── index.css
 ├── generate-showcase.mjs
 ├── index.html
+├── vercel.json
 └── vite.config.ts
 ```
